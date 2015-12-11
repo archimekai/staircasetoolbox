@@ -8,7 +8,9 @@ classdef SC <handle
     %                linear or logit mode support
     %                thrshold computation support
     %   ver 0.5
-    
+    %   ver 0.6     added:  sc.getntri()   % current trial number
+    %               added:  warnings about negitive sti0  which is still
+    %               under construction
     properties
         xnext           % the signal strength for the next trial  if xnext
         ndown           % 
@@ -48,6 +50,9 @@ classdef SC <handle
             % ?????????? especially the first trial
             sc.par = par;
             sc.xnext = par.sti0;
+            if(par.sti0 < 0)
+                warning('Negtive sti0 detected, please use with caution!');
+            end
             sc.sti0 = par.sti0;
             sc.stdsti = par.stdsti;
             sc.nup = par.nup;
@@ -181,7 +186,18 @@ classdef SC <handle
         % but how to compute?
         % use the mean of the reverse points
         function thr = getthr(sc, reversals)
-            revpoints = sc.history.sti(sc.reversals);
+            revpoints = sc.history.sti(sc.reversals > 0);
+            if (sc.countReversal < reversals)
+                warning('not enough reversals, using the last reversal as replacement!');
+                if(~isempty(revpoints))
+                    thr = revpoints(end);
+                else
+                    warning('no reversal point found, using last sti as replacement!');
+                    thr = sc.history.sti(sc.ncurtrial);
+                end
+                return;
+            end
+            
             thr = mean(revpoints(end - reversals + 1: end));    
         end
         %% plot a graph
@@ -201,9 +217,13 @@ classdef SC <handle
                end
            end
            thr = getthr(sc, 6);
-           line([thr,thr],[0 0]);
+           line([0,sc.ncurtrial],[thr thr]);
            xlabel('No. of trials');
            ylabel('compare sti');
+        end
+        
+        function i = getntri(sc)  % must call before sc.update
+           i = sc.ncurtrial - 1;
         end
     end    
 end
