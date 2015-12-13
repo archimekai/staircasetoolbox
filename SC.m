@@ -1,7 +1,7 @@
 classdef SC <handle
     %SC staircase method toolbox
     %   
-    %   by WEN Kai    2015-12-09   bilewhale@163.com
+    %   by WEN Kai    2015-12-09   wenkai123111 at 126.com
     %   Department of Psychology, Peking University
     %   
     %   highlights:  built in graph support
